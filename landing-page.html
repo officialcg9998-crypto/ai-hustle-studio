@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AI Hustle Studio — The AI That Works While You Sleep</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --gold: #f59e0b;
+    --red: #ef4444;
+    --green: #10b981;
+    --bg: #06060d;
+    --bg2: #0d0d18;
+    --border: #161625;
+    --text: #e2ddd4;
+    --muted: #5a5570;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    overflow-x: hidden;
+  }
+
+  /* NOISE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 0; opacity: 0.4;
+  }
+
+  /* AMBIENT GLOW */
+  .glow {
+    position: fixed; top: -30%; left: 50%; transform: translateX(-50%);
+    width: 900px; height: 600px;
+    background: radial-gradient(ellipse, rgba(245,158,11,0.06) 0%, transparent 65%);
+    pointer-events: none; z-index: 0;
+  }
+  .glow2 {
+    position: fixed; bottom: -20%; right: -10%;
+    width: 600px; height: 600px;
+    background: radial-gradient(ellipse, rgba(239,68,68,0.04) 0%, transparent 65%);
+    pointer-events: none; z-index: 0;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 18px 48px;
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(6,6,13,0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    display: flex; align-items: center; gap: 12px;
+    font-family: 'Playfair Display', serif;
+    font-size: 18px; font-weight: 700; color: #fff;
+    text-decoration: none;
+  }
+  .logo-icon {
+    width: 34px; height: 34px; border-radius: 8px;
+    background: linear-gradient(135deg, var(--gold), var(--red));
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; font-size: 16px; color: #000;
+    font-family: 'DM Mono', monospace;
+  }
+  .nav-links { display: flex; gap: 32px; align-items: center; }
+  .nav-links a {
+    color: var(--muted); text-decoration: none; font-size: 12px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta {
+    background: linear-gradient(135deg, var(--gold), var(--red));
+    color: #000 !important; padding: 8px 20px; border-radius: 8px;
+    font-weight: 500 !important; text-transform: none !important;
+    letter-spacing: 0.04em !important;
+  }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+    padding: 120px 24px 80px;
+    position: relative; z-index: 1;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    border: 1px solid rgba(245,158,11,0.3);
+    background: rgba(245,158,11,0.05);
+    color: var(--gold); font-size: 11px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    padding: 6px 18px; border-radius: 30px;
+    margin-bottom: 40px;
+    animation: fadeDown 0.8s ease both;
+  }
+  .hero-badge::before { content: '✦'; font-size: 8px; }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(48px, 8vw, 96px);
+    font-weight: 900; line-height: 1.05;
+    color: #fff; margin-bottom: 28px;
+    animation: fadeUp 0.9s ease 0.1s both;
+  }
+  .gradient-text {
+    background: linear-gradient(90deg, var(--gold) 0%, var(--red) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .hero-sub {
+    font-size: 16px; color: var(--muted); line-height: 1.8;
+    max-width: 520px; margin: 0 auto 52px;
+    animation: fadeUp 0.9s ease 0.2s both;
+  }
+  .hero-btns {
+    display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+    animation: fadeUp 0.9s ease 0.3s both;
+    margin-bottom: 72px;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--gold), var(--red));
+    color: #000; border: none; border-radius: 12px;
+    padding: 18px 40px; font-size: 15px; font-weight: 500;
+    cursor: pointer; font-family: 'DM Mono', monospace;
+    letter-spacing: 0.04em;
+    box-shadow: 0 8px 40px rgba(245,158,11,0.2);
+    text-decoration: none; display: inline-block;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 48px rgba(245,158,11,0.3); }
+  .btn-ghost {
+    background: transparent; color: var(--muted);
+    border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px 32px; font-size: 14px;
+    cursor: pointer; font-family: 'DM Mono', monospace;
+    text-decoration: none; display: inline-block;
+    transition: all 0.2s;
+  }
+  .btn-ghost:hover { border-color: #333; color: var(--text); }
+
+  /* STATS ROW */
+  .stats {
+    display: flex; gap: 48px; justify-content: center; flex-wrap: wrap;
+    animation: fadeUp 0.9s ease 0.4s both;
+  }
+  .stat { text-align: center; }
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 36px; font-weight: 700; color: #fff;
+    display: block;
+  }
+  .stat-label { font-size: 11px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
+
+  /* SECTION */
+  section { position: relative; z-index: 1; }
+  .section-inner { max-width: 1080px; margin: 0 auto; padding: 100px 24px; }
+  .section-tag {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.16em;
+    color: var(--gold); margin-bottom: 16px; display: block;
+  }
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(32px, 4vw, 52px);
+    font-weight: 700; color: #fff; line-height: 1.2;
+    margin-bottom: 20px;
+  }
+  .section-sub { color: var(--muted); font-size: 15px; line-height: 1.7; max-width: 520px; margin-bottom: 52px; }
+
+  /* TOOLS GRID */
+  .tools-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2px; background: var(--border); border: 1px solid var(--border);
+    border-radius: 20px; overflow: hidden;
+  }
+  .tool-card {
+    background: var(--bg2); padding: 32px 28px;
+    transition: background 0.2s;
+  }
+  .tool-card:hover { background: #111120; }
+  .tool-icon { font-size: 32px; margin-bottom: 16px; display: block; }
+  .tool-tag {
+    display: inline-block; font-size: 10px; text-transform: uppercase;
+    letter-spacing: 0.1em; padding: 2px 10px; border-radius: 20px;
+    margin-bottom: 12px;
+  }
+  .tool-name { font-family: 'Playfair Display', serif; font-size: 18px; color: #fff; margin-bottom: 8px; }
+  .tool-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  /* PRICING */
+  .pricing-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 20px;
+  }
+  .price-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 20px; padding: 32px 24px;
+    position: relative; transition: all 0.25s;
+  }
+  .price-card:hover { transform: translateY(-4px); }
+  .price-card.featured {
+    border-color: rgba(245,158,11,0.4);
+    box-shadow: 0 0 60px rgba(245,158,11,0.08);
+  }
+  .price-badge {
+    position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+    font-size: 10px; font-weight: 500; letter-spacing: 0.12em;
+    padding: 4px 16px; border-radius: 20px; white-space: nowrap;
+  }
+  .price-tier { font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: 12px; }
+  .price-amount {
+    font-family: 'Playfair Display', serif;
+    font-size: 48px; font-weight: 700; color: #fff;
+    margin-bottom: 4px;
+  }
+  .price-period { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+  .price-features { list-style: none; margin-bottom: 28px; }
+  .price-features li {
+    font-size: 13px; color: #999; padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex; gap: 8px; align-items: flex-start;
+  }
+  .price-features li:last-child { border-bottom: none; }
+  .check { flex-shrink: 0; margin-top: 1px; }
+  .btn-plan {
+    display: block; width: 100%; padding: 12px;
+    border-radius: 10px; font-size: 13px; font-weight: 500;
+    cursor: pointer; font-family: 'DM Mono', monospace;
+    letter-spacing: 0.04em; text-align: center;
+    text-decoration: none; transition: all 0.2s;
+  }
+
+  /* TESTIMONIALS */
+  .testimonials-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+  .testimonial {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 16px; padding: 28px;
+  }
+  .stars { color: var(--gold); font-size: 14px; margin-bottom: 14px; letter-spacing: 2px; }
+  .testimonial-text { font-size: 14px; color: #bbb; line-height: 1.7; margin-bottom: 18px; font-style: italic; }
+  .testimonial-author { font-size: 12px; color: var(--muted); }
+  .testimonial-author strong { color: var(--text); display: block; margin-bottom: 2px; }
+
+  /* HOW IT WORKS */
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: 2px; }
+  .step {
+    background: var(--bg2); padding: 36px 28px;
+    border: 1px solid var(--border); border-radius: 4px;
+    position: relative;
+  }
+  .step-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 64px; font-weight: 900; color: rgba(245,158,11,0.08);
+    position: absolute; top: 16px; right: 20px; line-height: 1;
+  }
+  .step-title { font-family: 'Playfair Display', serif; font-size: 18px; color: #fff; margin-bottom: 10px; }
+  .step-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  /* CTA SECTION */
+  .cta-section {
+    text-align: center; padding: 100px 24px;
+    background: linear-gradient(180deg, transparent, rgba(245,158,11,0.03), transparent);
+  }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 40px 48px;
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 16px;
+    font-size: 12px; color: var(--muted);
+    position: relative; z-index: 1;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:none; } }
+  @keyframes fadeDown { from { opacity:0; transform:translateY(-12px); } to { opacity:1; transform:none; } }
+
+  /* DIVIDER */
+  .divider { width: 60px; height: 2px; background: linear-gradient(90deg, var(--gold), var(--red)); margin-bottom: 32px; }
+
+  @media (max-width: 640px) {
+    nav { padding: 16px 20px; }
+    .nav-links { display: none; }
+    .hero { padding: 100px 20px 60px; }
+    .stats { gap: 28px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="glow"></div>
+<div class="glow2"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">
+    <div class="logo-icon">$</div>
+    AI HUSTLE STUDIO
+  </a>
+  <div class="nav-links">
+    <a href="#tools">Tools</a>
+    <a href="#how">How it works</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#your-app-url" class="nav-cta">Start Free →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">6 AI Income Tools · Stripe Payments · Start Free</div>
+  <h1>The AI that works<br/><span class="gradient-text">while you sleep</span></h1>
+  <p class="hero-sub">
+    Six powerful AI tools built for freelancers, creators, and entrepreneurs.
+    Generate income on autopilot — from product listings to cold emails to viral hooks.
+  </p>
+  <div class="hero-btns">
+    <a href="#your-app-url" class="btn-primary">Start Free — No Card Required →</a>
+    <a href="#pricing" class="btn-ghost">View Pricing</a>
+  </div>
+  <div class="stats">
+    <div class="stat"><span class="stat-num">6</span><span class="stat-label">AI Tools</span></div>
+    <div class="stat"><span class="stat-num">&lt;10s</span><span class="stat-label">Per Result</span></div>
+    <div class="stat"><span class="stat-num">$0</span><span class="stat-label">To Start</span></div>
+    <div class="stat"><span class="stat-num">∞</span><span class="stat-label">Possibilities</span></div>
+  </div>
+</div>
+
+<!-- TOOLS -->
+<section id="tools">
+  <div class="section-inner">
+    <span class="section-tag">✦ The Toolkit</span>
+    <div class="divider"></div>
+    <h2>Six tools.<br/>Infinite income.</h2>
+    <p class="section-sub">Every tool is designed to save you hours and make you money. Pick one, generate, profit.</p>
+    <div class="tools-grid">
+      <div class="tool-card">
+        <span class="tool-icon">📦</span>
+        <span class="tool-tag" style="background:rgba(245,158,11,0.1);color:#f59e0b;">eCommerce</span>
+        <div class="tool-name">Product Descriptions</div>
+        <p class="tool-desc">SEO-optimized listings for Etsy, Amazon & Shopify that actually convert browsers into buyers.</p>
+      </div>
+      <div class="tool-card">
+        <span class="tool-icon">✉️</span>
+        <span class="tool-tag" style="background:rgba(16,185,129,0.1);color:#10b981;">Freelancing</span>
+        <div class="tool-name">Cold Email Writer</div>
+        <p class="tool-desc">Win clients on autopilot. Short, punchy outreach emails with reply rates that actually move the needle.</p>
+      </div>
+      <div class="tool-card">
+        <span class="tool-icon">🎬</span>
+        <span class="tool-tag" style="background:rgba(239,68,68,0.1);color:#ef4444;">Creator Economy</span>
+        <div class="tool-name">YouTube Hook Generator</div>
+        <p class="tool-desc">5 viral hooks per video using proven psychological triggers — curiosity, bold claims, controversy and more.</p>
+      </div>
+      <div class="tool-card">
+        <span class="tool-icon">💡</span>
+        <span class="tool-tag" style="background:rgba(139,92,246,0.1);color:#8b5cf6;">Entrepreneurship</span>
+        <div class="tool-name">Niche Business Finder</div>
+        <p class="tool-desc">Discover untapped micro-niches tailored to your exact skills. With a first step you can take today.</p>
+      </div>
+      <div class="tool-card">
+        <span class="tool-icon">🧲</span>
+        <span class="tool-tag" style="background:rgba(59,130,246,0.1);color:#3b82f6;">Personal Brand</span>
+        <div class="tool-name">Social Media Bio</div>
+        <p class="tool-desc">Magnetic bios for Instagram, Twitter/X and LinkedIn that turn visitors into followers and followers into customers.</p>
+      </div>
+      <div class="tool-card">
+        <span class="tool-icon">💰</span>
+        <span class="tool-tag" style="background:rgba(16,185,129,0.1);color:#10b981;">Freelancing</span>
+        <div class="tool-name">Freelance Pricing Advisor</div>
+        <p class="tool-desc">Stop leaving money on the table. Get a custom pricing strategy with real dollar amounts for your exact service.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how" style="background: var(--bg2);">
+  <div class="section-inner">
+    <span class="section-tag">✦ How It Works</span>
+    <div class="divider"></div>
+    <h2>From zero to<br/>income in 3 steps</h2>
+    <p class="section-sub">No technical skills required. No learning curve. Just results.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-title">Pick a tool</div>
+        <p class="step-desc">Choose from 6 income-generating AI tools built for your hustle — free to start, no card required.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-title">Describe your need</div>
+        <p class="step-desc">Type a sentence about your product, service, or goal. The AI does the rest in under 10 seconds.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-title">Copy & profit</div>
+        <p class="step-desc">Copy the output straight to your Shopify store, email client, or social media. Start making money.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section>
+  <div class="section-inner">
+    <span class="section-tag">✦ Real Results</span>
+    <div class="divider"></div>
+    <h2>People are already<br/>making money</h2>
+    <p class="section-sub">Join hustlers using AI to work smarter, not harder.</p>
+    <div class="testimonials-grid">
+      <div class="testimonial">
+        <div class="stars">★★★★★</div>
+        <p class="testimonial-text">"I used the product description tool to write 40 Etsy listings in one afternoon. My store went from 2 sales a week to 15. This thing pays for itself every single day."</p>
+        <div class="testimonial-author"><strong>Marcus T.</strong>Etsy seller, handmade jewelry</div>
+      </div>
+      <div class="testimonial">
+        <div class="stars">★★★★★</div>
+        <p class="testimonial-text">"The cold email writer landed me 3 new web design clients in my first week. I was charging $500/site before. Now I'm charging $2,000 because the pricing advisor told me to."</p>
+        <div class="testimonial-author"><strong>Priya S.</strong>Freelance web designer</div>
+      </div>
+      <div class="testimonial">
+        <div class="stars">★★★★★</div>
+        <p class="testimonial-text">"I had no idea what niche to go into. The Niche Business Finder gave me 5 ideas and I launched one within 30 days. Already at $1,200/mo passive."</p>
+        <div class="testimonial-author"><strong>DeShawn R.</strong>Online entrepreneur</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing" style="background: var(--bg2);">
+  <div class="section-inner">
+    <span class="section-tag">✦ Pricing</span>
+    <div class="divider"></div>
+    <h2>Start free.<br/>Scale when ready.</h2>
+    <p class="section-sub">No lock-in. Cancel anytime. One client pays for months of subscription.</p>
+    <div class="pricing-grid">
+
+      <!-- FREE -->
+      <div class="price-card">
+        <div class="price-tier" style="color:#6b7280;">Free</div>
+        <div class="price-amount">$0</div>
+        <div class="price-period">forever</div>
+        <ul class="price-features">
+          <li><span class="check" style="color:#6b7280;">✓</span> 5 generations / month</li>
+          <li><span class="check" style="color:#6b7280;">✓</span> 2 tools unlocked</li>
+          <li><span class="check" style="color:#6b7280;">✓</span> Copy to clipboard</li>
+          <li style="color:#2a2a3a;"><span class="check">✗</span> All 6 tools</li>
+          <li style="color:#2a2a3a;"><span class="check">✗</span> Export features</li>
+        </ul>
+        <a href="#your-app-url" class="btn-plan" style="border:1px solid #2a2a3a;color:#6b7280;">Start Free</a>
+      </div>
+
+      <!-- STARTER -->
+      <div class="price-card">
+        <div class="price-tier" style="color:#10b981;">Starter</div>
+        <div class="price-amount" style="color:#10b981;">$19</div>
+        <div class="price-period">/month</div>
+        <ul class="price-features">
+          <li><span class="check" style="color:#10b981;">✓</span> 50 generations / month</li>
+          <li><span class="check" style="color:#10b981;">✓</span> All 6 tools unlocked</li>
+          <li><span class="check" style="color:#10b981;">✓</span> Copy to clipboard</li>
+          <li style="color:#2a2a3a;"><span class="check">✗</span> Priority output</li>
+          <li style="color:#2a2a3a;"><span class="check">✗</span> Export features</li>
+        </ul>
+        <a href="https://buy.stripe.com/eVqeVc6S13cX24b1Xg7wA00" class="btn-plan" style="border:1px solid rgba(16,185,129,0.4);color:#10b981;">💳 Start Earning</a>
+      </div>
+
+      <!-- PRO -->
+      <div class="price-card featured">
+        <div class="price-badge" style="background:linear-gradient(90deg,#f59e0b,#fbbf24);color:#000;">MOST POPULAR</div>
+        <div class="price-tier" style="color:#f59e0b;">Pro</div>
+        <div class="price-amount" style="color:#f59e0b;">$49</div>
+        <div class="price-period">/month</div>
+        <ul class="price-features">
+          <li><span class="check" style="color:#f59e0b;">✓</span> 300 generations / month</li>
+          <li><span class="check" style="color:#f59e0b;">✓</span> All 6 tools unlocked</li>
+          <li><span class="check" style="color:#f59e0b;">✓</span> Priority output quality</li>
+          <li><span class="check" style="color:#f59e0b;">✓</span> Export to PDF / DOC</li>
+          <li style="color:#2a2a3a;"><span class="check">✗</span> API access</li>
+        </ul>
+        <a href="https://buy.stripe.com/4gM00i2BL4h16kr7hA7wA01" class="btn-plan" style="background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#000;">💳 Go Pro</a>
+      </div>
+
+      <!-- UNLIMITED -->
+      <div class="price-card">
+        <div class="price-badge" style="background:linear-gradient(90deg,#ef4444,#f87171);color:#fff;">BEST VALUE</div>
+        <div class="price-tier" style="color:#ef4444;">Unlimited</div>
+        <div class="price-amount" style="color:#ef4444;">$99</div>
+        <div class="price-period">/month</div>
+        <ul class="price-features">
+          <li><span class="check" style="color:#ef4444;">✓</span> Unlimited generations</li>
+          <li><span class="check" style="color:#ef4444;">✓</span> All 6 tools unlocked</li>
+          <li><span class="check" style="color:#ef4444;">✓</span> Priority output quality</li>
+          <li><span class="check" style="color:#ef4444;">✓</span> Export to PDF / DOC</li>
+          <li><span class="check" style="color:#ef4444;">✓</span> API access + White-label</li>
+        </ul>
+        <a href="https://buy.stripe.com/aFa9AS1xH00L9wD0Tc7wA02" class="btn-plan" style="border:1px solid rgba(239,68,68,0.4);color:#ef4444;">💳 Go Unlimited</a>
+      </div>
+
+    </div>
+    <p style="text-align:center;color:var(--muted);font-size:12px;margin-top:28px;">
+      🔒 Payments secured by Stripe · Cancel anytime · No hidden fees
+    </p>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<div class="cta-section">
+  <span class="section-tag" style="display:block;text-align:center;">✦ Ready to start?</span>
+  <h2 style="text-align:center;margin-bottom:20px;">Your AI income machine<br/>is one click away</h2>
+  <p style="color:var(--muted);font-size:15px;margin-bottom:40px;max-width:400px;margin-left:auto;margin-right:auto;line-height:1.7;">
+    Start free today. No credit card. No commitment. Just results.
+  </p>
+  <a href="#your-app-url" class="btn-primary" style="font-size:16px;padding:20px 48px;">
+    Launch AI Hustle Studio — Free →
+  </a>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <div class="logo-icon" style="width:28px;height:28px;font-size:13px;">$</div>
+    <span style="font-family:'Playfair Display',serif;color:#fff;font-size:15px;">AI Hustle Studio</span>
+  </div>
+  <div>Payments by <span style="color:var(--gold);">Stripe</span> · Powered by <span style="color:var(--gold);">Claude AI</span></div>
+  <div>© 2026 AI Hustle Studio. All rights reserved.</div>
+</footer>
+
+</body>
+</html>

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { initializeApp } from "firebase/app";
 import {
   getAuth,
+
   onAuthStateChanged,
   signInWithPopup,
   GoogleAuthProvider,
@@ -213,20 +214,14 @@ export default function App() {
     setSelected(tool); setInput(""); setOutput("");
   };
 
-  const handleGenerate = async () => {
-    if (!input.trim() || !hasGens) return;
-    setLoading(true); setOutput("");
-    try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 1000,
-          system: selected.systemPrompt,
-          messages: [{ role: "user", content: selected.userPrompt(input) }],
-        }),
-      });
+  const res = await fetch("/api/generate", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    system: selected.systemPrompt,
+    prompt: selected.userPrompt(input),
+  }),
+});
       const data = await res.json();
       const text = data.content?.map(b => b.text || "").join("\n") || "No response.";
       setOutput(text);
